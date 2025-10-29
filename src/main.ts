@@ -18,6 +18,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://app.levsek.com.mx',
+      'https://stellar.levsek.com.mx',
       'http://localhost:5173',
       'http://localhost:3000'
     ],

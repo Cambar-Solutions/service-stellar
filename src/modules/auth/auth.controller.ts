@@ -59,8 +59,8 @@ export class AuthController {
       // Configurar cookie con session ID
       response.cookie('session_id', sessionId, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: true, // Siempre true para HTTPS
+        sameSite: 'none', // Permitir cross-site cookies
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días
       });
 

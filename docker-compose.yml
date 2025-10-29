@@ -3,17 +3,6 @@ services:
     build: .
     ports:
       - '4008:4008'
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - app-network
     restart: unless-stopped
     env_file:
       - .env
-
-networks:
-  app-network:
-    driver: bridge

@@ -24,7 +24,18 @@ async function bootstrap() {
     ],
     credentials: true, // Importante para cookies
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'X-Requested-With',
+      'Origin',
+      'Access-Control-Allow-Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers'
+    ],
+    exposedHeaders: ['Set-Cookie'],
+    maxAge: 3600,
   });
 
   const config = new DocumentBuilder()

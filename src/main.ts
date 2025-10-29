@@ -6,7 +6,7 @@ import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './common/exceptions/http.exception.filter';
 
 async function main() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
   const reflector = app.get(Reflector)
 
   const config = new DocumentBuilder()
@@ -16,7 +16,18 @@ async function main() {
     .addTag('OSM')
     .addBearerAuth()
     .build();
-  app.enableCors();
+
+  app.enableCors({
+    origin: [
+      'https://stellar.levsek.com.mx',
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://localhost:4008'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

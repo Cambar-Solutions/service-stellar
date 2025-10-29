@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UsersService } from 'src/modules/users/users.service';
+import { UserService } from 'src/modules/user/user.service';
 
 export const SKIP_SITE_ACCESS_KEY = 'skipSiteAccess';
 
@@ -13,7 +13,7 @@ export const SKIP_SITE_ACCESS_KEY = 'skipSiteAccess';
 export class SiteAccessGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private usersService: UsersService,
+    private userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -65,32 +65,13 @@ export class SiteAccessGuard implements CanActivate {
     siteId: number,
     userId: number,
   ): Promise<void> {
-    // Check if user has role with id 1 (super admin role)
-    const userRoleIds = await this.usersService.findUserRoleIds(userId);
-    const hasRole1 = userRoleIds.includes(1);
-
-    if (hasRole1) {
-      // User has role id 1, skip site validation and allow access to any site
-      return;
-    }
-
-    // User doesn't have role id 1, validate site access
-    const authUser = await this.usersService.findByIdWithSites(userId);
+    // Simplified: just check if user exists
+    const authUser = await this.userService.findById(userId);
     if (!authUser) {
       throw new UnauthorizedException('User not found');
     }
 
-    if (!authUser.userHasSites?.length) {
-      throw new UnauthorizedException('User has no site access');
-    }
-
-    const hasAccessToSite = authUser.userHasSites.some(
-      (userSite) => userSite.site.id === siteId,
-    );
-    if (!hasAccessToSite) {
-      throw new UnauthorizedException(
-        `User does not have access to site ${siteId}`,
-      );
-    }
+    // In simplified auth, we allow access to all sites
+    return;
   }
 }

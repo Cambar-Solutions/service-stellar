@@ -7,17 +7,17 @@ import { LoginDTO } from './models/dto/login.dto';
 import { RegisterDTO } from './models/dto/register.dto';
 import * as bcryptjs from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
   ) {}
 
   async login(data: LoginDTO) {
-    const user = await this.usersService.findOneByEmail(data.email);
+    const user = await this.userService.findByEmail(data.email);
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -48,7 +48,7 @@ export class AuthService {
   }
 
   async register(data: RegisterDTO) {
-    const existingUser = await this.usersService.findOneByEmail(data.email);
+    const existingUser = await this.userService.findByEmail(data.email);
 
     if (existingUser) {
       throw new ConflictException('User already exists');
@@ -56,7 +56,7 @@ export class AuthService {
 
     const hashedPassword = await bcryptjs.hash(data.password, 10);
 
-    const newUser = await this.usersService.create({
+    const newUser = await this.userService.create({
       name: data.name,
       email: data.email,
       password: hashedPassword,
@@ -73,7 +73,7 @@ export class AuthService {
   }
 
   async validate(userId: number) {
-    const user = await this.usersService.findById(userId);
+    const user = await this.userService.findById(userId);
 
     if (!user) {
       throw new UnauthorizedException('Invalid user');

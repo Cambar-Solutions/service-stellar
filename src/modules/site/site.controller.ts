@@ -5,7 +5,7 @@ import { CreateSiteDto } from './model/create-site.dto';
 import { UpdateSiteDto } from './model/update-site.dto';
 import { BaseController } from '../base/base.controller';
 import { SiteEntity } from './entity/site.entity';
-import { Public } from '../auth/decorators/public.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Sites')
 @Controller('sites')

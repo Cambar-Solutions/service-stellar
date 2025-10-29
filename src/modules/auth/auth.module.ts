@@ -4,6 +4,7 @@ import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { UserService } from '../user/user.service';
 import { SiteModule } from '../site/site.module';
+import { StellarModule } from '../stellar/stellar.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -15,6 +16,7 @@ import { CustomLoggerService } from '../../common/logger/logger.service';
   imports: [
     UserModule,
     SiteModule,
+    StellarModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'maizimo-secret-key-2024',

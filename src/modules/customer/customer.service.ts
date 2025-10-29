@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CustomerEntity } from './entity/customer.entity';
 import { CreateCustomerDto } from './model/create-customer.dto';
 import { UpdateCustomerDto } from './model/update-customer.dto';
+import { StellarService } from '../stellar/stellar.service';
 import { stringConstants } from '../../utils/string.constant';
 import {
   NotFoundCustomException,
@@ -20,9 +21,20 @@ export class CustomerService extends BaseService<CustomerEntity, CreateCustomerD
   constructor(
     @InjectRepository(CustomerEntity)
     private customerRepository: Repository<CustomerEntity>,
+    private stellarService: StellarService,
   ) {
     super();
     this.repository = this.customerRepository;
+  }
+
+  async create(createDto: CreateCustomerDto): Promise<CustomerEntity> {
+    // Generar wallet de Stellar para el Customer si no se proporcionó una
+    if (!createDto.stellarPublicKey) {
+      const keypair = this.stellarService.generateKeypair();
+      createDto.stellarPublicKey = keypair.publicKey;
+    }
+
+    return super.create(createDto);
   }
 
   protected getDefaultRelations(): { relations?: string[] } {

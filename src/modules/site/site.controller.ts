@@ -5,6 +5,7 @@ import { CreateSiteDto } from './model/create-site.dto';
 import { UpdateSiteDto } from './model/update-site.dto';
 import { BaseController } from '../base/base.controller';
 import { SiteEntity } from './entity/site.entity';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Sites')
 @Controller('sites')
@@ -17,6 +18,12 @@ export class SiteController extends BaseController<SiteEntity, CreateSiteDto, Up
     this.service = this.siteService;
   }
 
-  // Todos los métodos básicos se heredan de BaseController
-  // No hay endpoints específicos adicionales para Site en este momento
+  @Public()
+  @Get('public/:id')
+  @ApiOperation({ summary: 'Get public site information for public view' })
+  @ApiParam({ name: 'id', type: Number, description: 'Site ID' })
+  @ApiResponse({ status: 200, description: 'Site public data retrieved successfully' })
+  async getPublicSiteInfo(@Param('id', ParseIntPipe) id: number) {
+    return this.siteService.getPublicSiteInfo(id);
+  }
 }

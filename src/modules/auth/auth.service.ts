@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { SiteService } from '../site/site.service';
+import { StellarService } from '../stellar/stellar.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { comparePasswords } from '../../utils/password.utils';
@@ -12,6 +13,7 @@ export class AuthService {
   constructor(
     private usersService: UserService,
     private siteService: SiteService,
+    private stellarService: StellarService,
     private jwtService: JwtService,
   ) {}
 
@@ -85,10 +87,15 @@ export class AuthService {
       throw new ConflictException('El email ya está registrado');
     }
 
-    // Crear el Site (negocio)
+    // Generar wallet de Stellar para el Site
+    const siteKeypair = this.stellarService.generateKeypair();
+
+    // Crear el Site (negocio) con la wallet generada
     const site = await this.siteService.create({
       name: registerDto.businessName,
       status: stringConstants.STATUS_ACTIVE,
+      stellarPublicKey: siteKeypair.publicKey,
+      stellarSecretKey: siteKeypair.secretKey,
     });
 
     // Dividir el nombre completo en nombre y apellido

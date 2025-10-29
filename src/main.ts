@@ -1,53 +1,37 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
-import * as cookieParser from 'cookie-parser';
+import { HttpExceptionFilter } from './common/exceptions/http.exception.filter';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new TransformInterceptor());
-  
-  // Configurar cookies
-  app.use(cookieParser());
-  
-  // CORS con credentials
-  app.enableCors({
-    origin: [
-      'https://app.levsek.com.mx',
-      'https://stellar.levsek.com.mx',
-      'http://localhost:5173',
-      'http://localhost:3000'
-    ],
-    credentials: true, // Importante para cookies
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  });
+async function main() {
+  const app = await NestFactory.create(AppModule, { cors: true });
+  const reflector = app.get(Reflector)
 
   const config = new DocumentBuilder()
-    .setTitle('El rey API')
-    .setDescription('API para el sistema de gestión de El rey')
+    .setTitle('OSM example')
+    .setDescription('OSM API description')
     .setVersion('1.0')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Ingrese el token JWT',
-        in: 'header',
-      },
-      'access-token',
-    )
+    .addTag('OSM')
+    .addBearerAuth()
     .build();
+  app.enableCors();
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector),new TransformInterceptor());
+  const document = SwaggerModule.createDocument(app, config, {
+    operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
+    deepScanRoutes: true,
+  });
+  SwaggerModule.setup('api', app, document);
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
-
-  await app.listen(process.env.APP_PORT ?? 4007, '0.0.0.0');
+  await app.listen(process.env.PORT || 4008);
 }
-
-bootstrap();
+main();

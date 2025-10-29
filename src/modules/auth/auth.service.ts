@@ -1,129 +1,96 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
+import { LoginDTO } from './models/dto/login.dto';
+import { RegisterDTO } from './models/dto/register.dto';
+import * as bcryptjs from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
-import { SiteService } from '../site/site.service';
-import { StellarService } from '../stellar/stellar.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
-import { comparePasswords } from '../../utils/password.utils';
-import { stringConstants } from '../../utils/string.constant';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UserService,
-    private siteService: SiteService,
-    private stellarService: StellarService,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
-    if (user && await comparePasswords(password, user.password)) {
-      const { password, ...result } = user;
-      return result;
-    }
-    return null;
-  }
+  async login(data: LoginDTO) {
+    const user = await this.usersService.findOneByEmail(data.email);
 
-  async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
-      throw new UnauthorizedException('Credenciales inválidas');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Obtener el company y sus styles
-    const company = user.site?.company || null;
-    const companyStyle = company?.styles?.[0] || null;
+    const isPasswordValid = await bcryptjs.compare(data.password, user.password);
 
-    const payload = { 
-      email: user.email, 
-      sub: user.id,
-      role: user.role,
-      site_id: user.siteId
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
     };
 
+    const access_token = await this.jwtService.signAsync(payload);
+
     return {
-      access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        lastName: user.lastName,
-        role: user.role,
-        siteId: user.siteId,
-        site: user.site ? {
-          id: user.site.id,
-          name: user.site.name,
-          description: user.site.description,
-          company: company ? {
-            id: company.id,
-            name: company.name
-          } : null
-        } : null,
-        style: companyStyle ? {
-          id: companyStyle.id,
-          logoUrl: companyStyle.logoUrl,
-          logoAltText: companyStyle.logoAltText,
-          navbarActiveColor: companyStyle.navbarActiveColor,
-          navbarHoverColor: companyStyle.navbarHoverColor,
-          firePrimaryColor: companyStyle.firePrimaryColor,
-          fireSecondaryColor: companyStyle.fireSecondaryColor,
-          fireAccentColor: companyStyle.fireAccentColor,
-          fireTertiaryColor: companyStyle.fireTertiaryColor,
-          scrollbarThumbStartColor: companyStyle.scrollbarThumbStartColor,
-          scrollbarThumbEndColor: companyStyle.scrollbarThumbEndColor,
-          scrollbarThumbHoverStartColor: companyStyle.scrollbarThumbHoverStartColor,
-          scrollbarThumbHoverEndColor: companyStyle.scrollbarThumbHoverEndColor
-        } : null
-      }
+      },
+      access_token,
     };
   }
 
-  async register(registerDto: RegisterDto) {
-    // Verificar si el email ya existe
-    const existingUser = await this.usersService.findByEmail(registerDto.email);
+  async register(data: RegisterDTO) {
+    const existingUser = await this.usersService.findOneByEmail(data.email);
+
     if (existingUser) {
-      throw new ConflictException('El email ya está registrado');
+      throw new ConflictException('User already exists');
     }
 
-    // Generar wallet de Stellar para el Site
-    const siteKeypair = this.stellarService.generateKeypair();
+    const hashedPassword = await bcryptjs.hash(data.password, 10);
 
-    // Crear el Site (negocio) con la wallet generada
-    const site = await this.siteService.create({
-      name: registerDto.businessName,
-      status: stringConstants.STATUS_ACTIVE,
-      stellarPublicKey: siteKeypair.publicKey,
-      stellarSecretKey: siteKeypair.secretKey,
+    const newUser = await this.usersService.create({
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
     });
 
-    // Dividir el nombre completo en nombre y apellido
-    const nameParts = registerDto.name.trim().split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : nameParts[0];
-
-    // Crear el usuario con rol DIRECTOR
-    // user.service.ts ya hashea la contraseña automáticamente en el método create()
-    const user = await this.usersService.create({
-      email: registerDto.email,
-      name: firstName,
-      lastName: lastName,
-      password: registerDto.password, // NO hashear aquí, user.service lo hace
-      siteId: site.id,
-      role: stringConstants.DIRECTOR,
-      status: stringConstants.STATUS_ACTIVE,
-    });
-
-    // Retornar el usuario sin la contraseña
-    const { password, ...userWithoutPassword } = user;
     return {
-      message: 'Usuario registrado exitosamente',
-      user: userWithoutPassword,
-      site: {
-        id: site.id,
-        name: site.name,
-      }
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+      },
+      message: 'User registered successfully',
     };
   }
-} 
+
+  async validate(userId: number) {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid user');
+    }
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    };
+  }
+
+  async logout() {
+    return {
+      message: 'Logout successful',
+    };
+  }
+}

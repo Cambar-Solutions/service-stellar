@@ -1,6 +1,0 @@
-export enum Role {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  DIRECTOR = 'DIRECTOR',
-  MANAGER = 'MANAGER',
-  EMPLOYEE = 'EMPLOYEE',
-} 

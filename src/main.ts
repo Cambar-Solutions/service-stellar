@@ -14,13 +14,17 @@ async function bootstrap() {
   // Configurar cookies
   app.use(cookieParser());
   
-  // CORS - Permitir todo
+  // CORS con credentials
   app.enableCors({
-    origin: true, // Permitir todos los orígenes
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-    allowedHeaders: '*',
-    exposedHeaders: ['Set-Cookie'],
+    origin: [
+      'https://app.levsek.com.mx',
+      'https://stellar.levsek.com.mx',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ],
+    credentials: true, // Importante para cookies
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   });
 
   const config = new DocumentBuilder()

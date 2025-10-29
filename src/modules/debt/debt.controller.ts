@@ -66,6 +66,16 @@ export class DebtController {
     return this.debtService.registerPayment(+id, registerPaymentDto);
   }
 
+  @Patch(':id/approve-payment')
+  @ApiOperation({ summary: 'Approve pending payment - Registers payment to MySQL + Stellar' })
+  @ApiResponse({ status: 200, description: 'Payment approved and registered' })
+  approvePayment(
+    @Param('id') id: string,
+    @Body() registerPaymentDto: RegisterPaymentDto,
+  ) {
+    return this.debtService.registerPayment(+id, registerPaymentDto);
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Delete debt' })
   remove(@Param('id') id: string) {

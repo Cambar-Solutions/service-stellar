@@ -26,7 +26,7 @@ export class SiteService extends BaseService<SiteEntity, CreateSiteDto, UpdateSi
   }
 
   protected getDefaultRelations(): { relations?: string[] } {
-    return { relations: ['company', 'siteStyles'] };
+    return { relations: ['users'] };
   }
 
   // Los métodos básicos (findAll, findAllActive, findById, create, update, updateStatus, delete)

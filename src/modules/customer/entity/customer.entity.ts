@@ -7,14 +7,6 @@ import { SiteEntity } from '../../site/entity/site.entity';
 export class CustomerEntity extends Base {
 
   @ApiProperty({
-    description: 'ID de la compañía',
-    example: 1,
-    type: Number
-  })
-  @Column({ type: 'int', unsigned: true, name: 'company_id'})
-  companyId: number;
-
-  @ApiProperty({
     description: 'ID del sitio',
     example: 1,
     type: Number
@@ -22,21 +14,6 @@ export class CustomerEntity extends Base {
   @Column({ type: 'int', unsigned: true, name: 'site_id', nullable: true })
   siteId: number;
 
-  @ApiProperty({
-    description: 'ID del whatsapp',
-    example: '1234567890',
-    type: String
-  })
-  @Column({ type: 'varchar', length: 255, name: 'wa_id', nullable: true })
-  waId: string;
-
-  @ApiProperty({
-    description: 'ID compuesto: companyId_waId',
-    example: '15217773280963',
-    type: String
-  })
-  @Column({ type: 'varchar', length: 255, name: 'company_id_wa_id', nullable: true, unique: true })
-  companyId_waId: string;
 
   @ApiProperty({
     description: 'Nombre del cliente',
@@ -47,20 +24,30 @@ export class CustomerEntity extends Base {
   name: string;
 
   @ApiProperty({
-    description: 'Apellido del cliente',
-    example: 'Pérez',
-    type: String
-  })
-  @Column({ type: 'varchar', name: 'last_name' })
-  last_name: string;
-
-  @ApiProperty({
     description: 'Número telefónico del cliente',
     example: '+52 55 1234 5678',
     type: String
   })
   @Column({ type: 'varchar', name: 'phone_number' })
-  phone_number: string;
+  phoneNumber: string;
+
+  @ApiProperty({
+    description: 'Email del cliente',
+    example: 'juan@example.com',
+    type: String,
+    required: false
+  })
+  @Column({ type: 'varchar', nullable: true })
+  email: string;
+
+  @ApiProperty({
+    description: 'Stellar public key del cliente',
+    example: 'GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    type: String,
+    required: false
+  })
+  @Column({ type: 'varchar', length: 56, nullable: true, name: 'stellar_public_key' })
+  stellarPublicKey: string;
 
   @ApiProperty({
     description: 'Fecha de nacimiento',
@@ -68,7 +55,7 @@ export class CustomerEntity extends Base {
     type: Date
   })
   @Column({ type: 'date', name: 'birth_date' })
-  birth_date: Date;
+  birthDate: Date;
 
   @ApiProperty({
     description: 'Género del cliente',
@@ -97,7 +84,7 @@ export class CustomerEntity extends Base {
     required: false
   })
   @Column({ type: 'varchar', nullable: true, name: 'zip_code' })
-  zip_code: string;
+  zipCode: string;
 
   @ApiProperty({
     description: 'Notas adicionales sobre el cliente',

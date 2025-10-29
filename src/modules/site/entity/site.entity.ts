@@ -16,87 +16,6 @@ export class SiteEntity extends Base {
   name: string;
 
   @ApiProperty({
-    description: 'Descripción del sitio',
-    example: 'Sucursal ubicada en el centro de la ciudad',
-    type: String,
-    required: false
-  })
-  @Column({ type: 'text', nullable: true })
-  description: string;
-
-  @ApiProperty({
-    description: 'RFC del sitio',
-    example: 'ABC123456789',
-    type: String
-  })
-  @Column({ type: 'varchar', length: 13 })
-  rfc: string;
-
-  @ApiProperty({
-    description: 'Dirección del sitio',
-    example: 'Av. Juárez 123, Col. Centro',
-    type: String
-  })
-  @Column({ type: 'varchar', length: 200 })
-  address: string;
-
-  @ApiProperty({
-    description: 'Número telefónico del sitio',
-    example: '5512345678',
-    type: String
-  })
-  @Column({ type: 'varchar', length: 13 })
-  phone_number: string;
-
-  @ApiProperty({
-    description: 'Número de WhatsApp del sitio',
-    example: '5512345678',
-    type: String
-  })
-  @Column({ type: 'varchar', length: 13 })
-  whatsapp_number: string;
-
-  @ApiProperty({
-    description: 'Email del sitio',
-    example: 'centro@empresa.com',
-    type: String
-  })
-  @Column({ type: 'varchar', length: 60 })
-  email: string;
-
-  @ApiProperty({
-    description: 'Fecha de vencimiento',
-    example: '2024-12-31',
-    type: Date
-  })
-  @Column({ type: 'date' })
-  due_date: Date;
-
-  @ApiProperty({
-    description: 'Pago mensual',
-    example: 1500.00,
-    type: Number
-  })
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
-  monthly_payment: number;
-
-  @ApiProperty({
-    description: 'Moneda',
-    example: 'MXN',
-    type: String
-  })
-  @Column({ type: 'char', length: 3 })
-  currency: string;
-
-  @ApiProperty({
-    description: 'Días de historial de la app',
-    example: 180,
-    type: Number
-  })
-  @Column({ type: 'smallint', default: 180 })
-  app_history_days: number;
-
-  @ApiProperty({
     description: 'Estado del sitio',
     example: 'ACTIVE',
     enum: [stringConstants.STATUS_ACTIVE, stringConstants.STATUS_INACTIVE]
@@ -109,12 +28,21 @@ export class SiteEntity extends Base {
   status: string;
 
   @ApiProperty({
-    description: 'Código postal',
-    example: '06000',
-    type: String
+    description: 'Stellar public key del sitio',
+    example: 'GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+    type: String,
+    required: false
   })
-  @Column({ type: 'varchar', length: 5 })
-  zip_code: string;
+  @Column({ type: 'varchar', length: 56, nullable: true, name: 'stellar_public_key' })
+  stellarPublicKey: string;
+
+  @ApiProperty({
+    description: 'Stellar secret key del sitio (ENCRYPTED)',
+    type: String,
+    required: false
+  })
+  @Column({ type: 'varchar', length: 100, nullable: true, name: 'stellar_secret_key' })
+  stellarSecretKey: string;
 
   @OneToMany(() => UserEntity, user => user.site)
   users: UserEntity[];

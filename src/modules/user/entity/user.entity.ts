@@ -124,7 +124,7 @@ export class UserEntity extends Base {
     example: '2024-03-20T14:00:00.000Z',
     type: Date,
     required: false
-  })
+  })  
   @Column({
     name: 'code_generated_at',
     type: 'timestamp',

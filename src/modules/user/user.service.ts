@@ -37,27 +37,39 @@ export class UserService extends BaseService<UserEntity, CreateUserDto, UpdateUs
   }
 
 
-  async findAllBySiteId(siteId: number) {
+  async findAllBySiteId(siteId: number): Promise<UserEntity[]> {
     try {
-      return await this.userRepository.find({ where: { siteId } });
+      return await this.userRepository.find({
+        where: { siteId },
+        relations: ['site']
+      });
     } catch (error) {
       HandleException.exception(error);
+      return [];
     }
   }
 
-  async findAllActiveBySiteId(siteId: number) {
+  async findAllActiveBySiteId(siteId: number): Promise<UserEntity[]> {
     try {
-      return await this.userRepository.find({ where: { siteId, status: stringConstants.STATUS_ACTIVE } });
+      return await this.userRepository.find({
+        where: { siteId, status: stringConstants.STATUS_ACTIVE },
+        relations: ['site']
+      });
     } catch (error) {
       HandleException.exception(error);
+      return [];
     }
   }
 
-  async findByRole(role: string) {
+  async findByRole(role: string): Promise<UserEntity[]> {
     try {
-      return await this.userRepository.find({ where: { role } });
+      return await this.userRepository.find({
+        where: { role },
+        relations: ['site']
+      });
     } catch (error) {
       HandleException.exception(error);
+      return [];
     }
   }
 
@@ -319,23 +331,15 @@ export class UserService extends BaseService<UserEntity, CreateUserDto, UpdateUs
   }
 
 
-  async findAllPhoneNumbers() {
+  async findAllPhoneNumbers(): Promise<string[]> {
     try {
-      const phoneNumbers = await this.userRepository.find({ select: ['phoneNumber'] });
-      const phoneNumbersFormatted = phoneNumbers.map(phoneNumber => {
-        const number = phoneNumber.phoneNumber;
-        
-        const plusIndex = number.indexOf('+');
-        const countryCodeEnd = number.length - 10;
-        const countryCode = number.substring(plusIndex, countryCodeEnd);
-        const localNumber = number.substring(countryCodeEnd);
-        
-        return `${countryCode}1${localNumber}`;
+      const users = await this.userRepository.find({
+        select: ['phoneNumber']
       });
-      
-      return phoneNumbersFormatted;
+      return users.map(user => user.phoneNumber).filter(Boolean);
     } catch (error) {
       HandleException.exception(error);
+      return [];
     }
   }
 }

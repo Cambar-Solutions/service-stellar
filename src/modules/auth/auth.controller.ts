@@ -1,17 +1,18 @@
-import { 
-  Controller, 
-  Post, 
-  Body, 
-  UnauthorizedException, 
-  Res, 
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  Res,
   Get,
   UseGuards,
   Req,
-  ForbiddenException 
+  ForbiddenException
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { Response, Request } from 'express';
 import { SessionService } from './session.service';
 import { SessionGuard } from './guards/session.guard';
@@ -76,6 +77,18 @@ export class AuthController {
     }
   }
 
+  @Post('register')
+  @ApiOperation({ summary: 'Registrar nuevo usuario y negocio' })
+  @ApiResponse({ status: 201, description: 'Usuario registrado exitosamente' })
+  @ApiResponse({ status: 409, description: 'El email ya está registrado' })
+  async register(@Body() registerDto: RegisterDto) {
+    try {
+      return await this.authService.register(registerDto);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get('validate')
   @UseGuards(SessionGuard)
   @ApiOperation({ summary: 'Validar sesión y obtener información del usuario' })
@@ -97,7 +110,6 @@ export class AuthController {
         site: fullUser?.site ? {
           id: fullUser?.site.id,
           name: fullUser.site.name,
-          description: fullUser.site.description,
         } : null,
       }
     };

@@ -1,0 +1,14 @@
+D:\reps\hackaton\service-stellar\contracts\debt_registry\target\release\deps\serde-9a000a80584c106c.d: C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs D:\reps\hackaton\service-stellar\contracts\debt_registry\target\release\build\serde-c13d669cd1155b12\out/private.rs
+
+D:\reps\hackaton\service-stellar\contracts\debt_registry\target\release\deps\libserde-9a000a80584c106c.rlib: C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs D:\reps\hackaton\service-stellar\contracts\debt_registry\target\release\build\serde-c13d669cd1155b12\out/private.rs
+
+D:\reps\hackaton\service-stellar\contracts\debt_registry\target\release\deps\libserde-9a000a80584c106c.rmeta: C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs D:\reps\hackaton\service-stellar\contracts\debt_registry\target\release\build\serde-c13d669cd1155b12\out/private.rs
+
+C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\Isaac\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+D:\reps\hackaton\service-stellar\contracts\debt_registry\target\release\build\serde-c13d669cd1155b12\out/private.rs:
+
+# env-dep:OUT_DIR=D:\\reps\\hackaton\\service-stellar\\contracts\\debt_registry\\target\\release\\build\\serde-c13d669cd1155b12\\out

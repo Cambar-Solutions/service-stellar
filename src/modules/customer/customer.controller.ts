@@ -34,14 +34,6 @@ export class CustomerController extends BaseController<CustomerEntity, CreateCus
     return await this.customerService.findByGender(gender);
   }
 
-  @Get('/company/:companyId')
-  @ApiOperation({ summary: 'Get all customers by company' })
-  @ApiParam({ name: 'companyId', type: 'number', description: 'Company ID' })
-  @ApiResponse({ status: 200, description: 'Return all customers for the company' })
-  async findByCompany(@Param('companyId', ParseIntPipe) companyId: number) {
-    return await this.customerService.findByCompany(companyId);
-  }
-
   @Get('/phone/:phoneNumber')
   @ApiOperation({ summary: 'Get customer by phone number' })
   @ApiParam({ name: 'phoneNumber', type: 'string', description: 'Phone number' })

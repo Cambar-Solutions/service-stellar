@@ -11,6 +11,8 @@ import { UserModule } from './modules/user/user.module';
 import { SiteModule } from './modules/site/site.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DebtModule } from './modules/debt/debt.module';
+import { StellarModule } from './modules/stellar/stellar.module';
 
 
 @Module({
@@ -22,6 +24,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     UserModule,
     SiteModule,
     CustomerModule,
+    DebtModule,
+    StellarModule,
   ],
   controllers: [AppController],
   providers: [AppService, CustomLoggerService,

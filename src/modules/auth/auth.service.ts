@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { LoginDTO } from './models/dto/login.dto';
 import { RegisterDTO } from './models/dto/register.dto';
-import * as bcryptjs from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
+import * as bcryptjs from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -54,18 +54,17 @@ export class AuthService {
       throw new ConflictException('User already exists');
     }
 
-    const hashedPassword = await bcryptjs.hash(data.password, 10);
-
     // Split name into firstName and lastName
     const nameParts = data.name.trim().split(' ');
     const firstName = nameParts[0];
     const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : nameParts[0];
 
+    // user.service.create ya hashea el password, no necesitamos hacerlo aquí
     const newUser = await this.userService.create({
       name: firstName,
       lastName: lastName,
       email: data.email,
-      password: hashedPassword,
+      password: data.password, // El password sin hashear, user.service lo hará
       siteId: 1, // Default site for simplified auth
     });
 

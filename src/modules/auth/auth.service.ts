@@ -56,10 +56,17 @@ export class AuthService {
 
     const hashedPassword = await bcryptjs.hash(data.password, 10);
 
+    // Split name into firstName and lastName
+    const nameParts = data.name.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : nameParts[0];
+
     const newUser = await this.userService.create({
-      name: data.name,
+      name: firstName,
+      lastName: lastName,
       email: data.email,
       password: hashedPassword,
+      siteId: 1, // Default site for simplified auth
     });
 
     return {

@@ -14,6 +14,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DebtModule } from './modules/debt/debt.module';
 import { StellarModule } from './modules/stellar/stellar.module';
 import { PendingPaymentModule } from './modules/pending-payment/pending-payment.module';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
 
 
 @Module({
@@ -28,6 +29,7 @@ import { PendingPaymentModule } from './modules/pending-payment/pending-payment.
     DebtModule,
     StellarModule,
     PendingPaymentModule,
+    ChatbotModule,
   ],
   controllers: [AppController],
   providers: [AppService, CustomLoggerService,

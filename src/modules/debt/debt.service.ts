@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateDebtDto } from './dto/create-debt.dto';
@@ -100,46 +100,23 @@ export class DebtService {
       throw new NotFoundException(`Debt ${debtId} not found`);
     }
 
-    // Log estado actual antes del pago
-    this.logger.log(`[BEFORE PAYMENT] Debt ${debtId}: totalAmount=${debt.totalAmount}, paidAmount=${debt.paidAmount}, pendingAmount=${debt.pendingAmount}, status=${debt.status}`);
-    this.logger.log(`[PAYMENT] Registering payment of ${registerPaymentDto.amount} for debt ${debtId}`);
-
-    // 1. Update MySQL - Calcular nuevos valores
-    const previousPaidAmount = Number(debt.paidAmount) || 0;
-    const paymentAmount = Number(registerPaymentDto.amount) || 0;
-    const totalAmount = Number(debt.totalAmount) || 0;
-
-    // Validar que el pago no exceda el monto pendiente
-    const currentPendingAmount = Number(debt.pendingAmount) || 0;
-    if (paymentAmount > currentPendingAmount) {
-      this.logger.error(`Payment amount ${paymentAmount} exceeds pending amount ${currentPendingAmount}`);
-      throw new BadRequestException(
-        `Payment amount (${paymentAmount}) exceeds pending amount (${currentPendingAmount})`
-      );
-    }
-
-    // Calcular nuevos montos
-    debt.paidAmount = previousPaidAmount + paymentAmount;
-    debt.pendingAmount = totalAmount - debt.paidAmount;
+    // 1. Update MySQL
+    debt.paidAmount = Number(debt.paidAmount) + registerPaymentDto.amount;
+    debt.pendingAmount = debt.totalAmount - debt.paidAmount;
     debt.paymentType = registerPaymentDto.paymentType as any;
 
     if (registerPaymentDto.notes) {
       debt.notes = registerPaymentDto.notes;
     }
 
-    // Actualizar status basado en el monto pendiente
     if (debt.pendingAmount <= 0) {
       debt.status = 'paid';
-      debt.pendingAmount = 0; // Asegurar que sea exactamente 0
+      debt.pendingAmount = 0;
     } else if (debt.paidAmount > 0) {
       debt.status = 'partial';
     }
 
-    // Log estado después del cálculo
-    this.logger.log(`[AFTER CALCULATION] Debt ${debtId}: totalAmount=${debt.totalAmount}, paidAmount=${debt.paidAmount}, pendingAmount=${debt.pendingAmount}, status=${debt.status}`);
-
     await this.debtRepository.save(debt);
-    this.logger.log(`[SAVED] Debt ${debtId} saved to database successfully`);
 
     // 2. Register payment on blockchain
     if (debt.site.stellarPublicKey && debt.site.stellarSecretKey) {

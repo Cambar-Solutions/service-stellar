@@ -15,6 +15,7 @@ import { DebtModule } from './modules/debt/debt.module';
 import { StellarModule } from './modules/stellar/stellar.module';
 import { PendingPaymentModule } from './modules/pending-payment/pending-payment.module';
 import { ChatbotModule } from './modules/chatbot/chatbot.module';
+import { ZkProofModule } from './modules/zkproof/zkproof.module';
 
 
 @Module({
@@ -30,6 +31,7 @@ import { ChatbotModule } from './modules/chatbot/chatbot.module';
     StellarModule,
     PendingPaymentModule,
     ChatbotModule,
+    ZkProofModule,
   ],
   controllers: [AppController],
   providers: [AppService, CustomLoggerService,

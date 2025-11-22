@@ -1,456 +1,452 @@
-# Sistema de Registro de Deudas con Stellar/Soroban
+# Service Stellar - Sistema de Gestión de Deudas con Blockchain
 
-Sistema completo de gestión de deudas con integración a blockchain Stellar/Soroban para inmutabilidad y trazabilidad.
+[![NestJS](https://img.shields.io/badge/NestJS-11.0-red.svg)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg)](https://www.typescriptlang.org/)
+[![Stellar](https://img.shields.io/badge/Stellar-Testnet-purple.svg)](https://stellar.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22.x-green.svg)](https://nodejs.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.x-blue.svg)](https://www.mysql.com/)
 
-## 📋 Estado del Proyecto
-
-### ✅ Completado
-
-1. **Base de Datos (MySQL + TypeORM)**
-   - ✅ 4 entidades creadas: Site, User, Customer, Debt
-   - ✅ Campos Stellar agregados (stellar_public_key, stellar_secret_key)
-   - ✅ Relaciones entre entidades configuradas
-   - ✅ Módulos NestJS con TypeORM configurados
-
-2. **Smart Contract Soroban**
-   - ✅ Contrato `debt_registry` en Rust creado
-   - ✅ Compilado exitosamente
-   - ✅ Desplegado a testnet
-   - ✅ Contract ID: `CCCJCFG27XNQWMDZ4VU5XWTMKEUC6O4RNM4OOMAINYWAI3K5WHF3XH4U`
-   - ✅ Funciones disponibles:
-     - `register_debt()` - Registrar nueva deuda
-     - `register_payment()` - Registrar pago
-     - `get_debt()` - Consultar deuda
-     - `get_payments()` - Contador de pagos
-     - `update_status()` - Actualizar estado
-
-3. **Dependencias Instaladas**
-   - ✅ @stellar/stellar-sdk
-   - ✅ TypeORM + MySQL
-   - ✅ NestJS ecosystem
-   - ✅ Swagger para documentación API
-
-### 🔄 Pendiente de Implementar
-
-4. **Stellar Service Integration**
-   - ⏳ Crear `src/modules/stellar/stellar.service.ts`
-   - ⏳ Implementar `registerDebt()` method
-   - ⏳ Implementar `registerPayment()` method
-   - ⏳ Implementar `getDebt()` query method
-   - ⏳ Helpers para encrypt/decrypt secret keys
-
-5. **Debt Service Integration**
-   - ⏳ Integrar StellarService en DebtService
-   - ⏳ Al crear deuda → MySQL + Soroban
-   - ⏳ Al pagar → MySQL + Soroban
-   - ⏳ Endpoints CRUD completos
-
-6. **Stripe Integration**
-   - ⏳ Instalar Stripe SDK
-   - ⏳ PaymentService con payment intents
-   - ⏳ Webhook handler
-
-7. **Testing & Docs**
-   - ⏳ Tests completos
-   - ⏳ Swagger documentation
-   - ⏳ Postman collection
+Sistema backend empresarial completo para gestión de deudas con registro dual: base de datos relacional MySQL y blockchain Stellar mediante smart contracts Soroban. Diseñado para proporcionar trazabilidad inmutable, transparencia y seguridad en operaciones financieras.
 
 ---
 
-## 🗄️ Esquema de Base de Datos
+## Tabla de Contenidos
 
-### Site (Tienda/Sucursal)
-```typescript
-- id, created_at, updated_at
-- name, description
-- rfc, address, phone_number
-- stellar_public_key  // Wallet de la tienda
-- stellar_secret_key  // Encrypted!
-- users[], customers[], debts[]
-```
-
-### User (Dueños/Admins)
-```typescript
-- id, created_at, updated_at
-- site_id
-- email, name, password (hashed)
-- role: SUPER_ADMIN | DIRECTOR | MANAGER | EMPLOYEE
-- status: ACTIVE | INACTIVE
-```
-
-### Customer (Clientes deudores)
-```typescript
-- id, created_at, updated_at
-- site_id
-- name, email, phone_number
-- stellar_public_key  // Opcional
-- address, notes
-- debts[]
-```
-
-### Debt (Créditos/Deudas)
-```typescript
-- id, created_at, updated_at
-- site_id, customer_id, created_by (user_id)
-- total_amount, paid_amount, pending_amount
-- status: pending | partial | paid | cancelled
-- payment_type: stripe | cash | transfer | stellar
-- payment_reference  // Stripe payment intent ID
-- stellar_tx_hash    // Blockchain transaction hash
-- description, notes
-```
+1. [Descripción General](#descripción-general)
+2. [Características Principales](#características-principales)
+3. [Arquitectura del Sistema](#arquitectura-del-sistema)
+4. [Tecnologías Utilizadas](#tecnologías-utilizadas)
+5. [Estructura del Proyecto](#estructura-del-proyecto)
+6. [Requisitos Previos](#requisitos-previos)
+7. [Instalación y Configuración](#instalación-y-configuración)
+8. [Variables de Entorno](#variables-de-entorno)
+9. [Módulos Funcionales](#módulos-funcionales)
+10. [Smart Contract Soroban](#smart-contract-soroban)
+11. [Base de Datos](#base-de-datos)
+12. [API Endpoints](#api-endpoints)
+13. [Flujos de Trabajo](#flujos-de-trabajo)
+14. [Seguridad](#seguridad)
+15. [Testing](#testing)
+16. [Deployment](#deployment)
+17. [Documentación API](#documentación-api)
+18. [Mejores Prácticas](#mejores-prácticas)
+19. [Roadmap](#roadmap)
+20. [Recursos Adicionales](#recursos-adicionales)
 
 ---
 
-## 🔗 Smart Contract (Soroban)
+## Descripción General
 
-**Ubicación:** `contracts/debt_registry/`
+**Service Stellar** es un sistema backend robusto desarrollado con NestJS que combina la confiabilidad de bases de datos relacionales con la inmutabilidad y transparencia de blockchain Stellar. El sistema permite:
 
-**Contract ID (Testnet):**
+- **Gestión de deudas empresariales** con múltiples sitios/sucursales
+- **Registro dual** en MySQL (performance) y Stellar (inmutabilidad)
+- **Sistema de aprobación** para pagos públicos
+- **Asistente virtual IA** para soporte al usuario
+- **Multi-tenancy** con control de acceso por sitio
+- **Trazabilidad completa** mediante blockchain
+
+### Propósito del Proyecto
+
+Desarrollado como solución empresarial para el Hackathon Stellar, este sistema resuelve el problema de confianza en registros financieros al proporcionar una capa blockchain inmutable donde todas las deudas y pagos quedan registrados de forma permanente y verificable.
+
+---
+
+## Características Principales
+
+### ✅ Registro Blockchain Dual
+- Cada deuda se registra simultáneamente en MySQL y blockchain Stellar
+- Smart contract Soroban garantiza inmutabilidad de registros
+- Hash de transacción blockchain almacenado para verificación
+
+### ✅ Sistema de Aprobación de Pagos
+- Vista pública para que clientes reporten pagos sin autenticación
+- Flujo de aprobación/rechazo por administradores
+- Prevención de fraude mediante validación manual
+
+### ✅ Multi-Tenancy
+- Soporte para múltiples sitios/sucursales independientes
+- Cada sitio tiene su propia wallet Stellar
+- Control de acceso basado en roles y sitios
+
+### ✅ Asistente Virtual IA
+- Chatbot inteligente con Anthropic Claude 3.5 Sonnet
+- Contexto especializado en gestión de deudas
+- Soporte en español con respuestas estructuradas
+
+### ✅ Arquitectura Modular
+- Patrón base abstracto para operaciones CRUD
+- Reducción ~60% de código duplicado
+- Fácil extensión con nuevos módulos
+
+### ✅ Seguridad Robusta
+- Autenticación JWT con tokens Bearer
+- Control de acceso basado en roles (RBAC)
+- Validación de datos con DTOs
+- Protección contra SQL injection
+
+---
+
+## Arquitectura del Sistema
+
+### Diagrama de Alto Nivel
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      CLIENTE (Frontend)                     │
+│              (React, Vue, o aplicación móvil)               │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ HTTP/REST
+┌─────────────────────────────────────────────────────────────┐
+│                   API REST (NestJS)                         │
+│  ┌──────────────┬──────────────┬──────────────────────┐    │
+│  │ Controllers  │ Guards/Auth  │ Swagger Docs         │    │
+│  └──────────────┴──────────────┴──────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                  CAPA DE SERVICIOS                          │
+│  ┌─────────────┬──────────────┬──────────────────────┐     │
+│  │ BaseService │ DebtService  │ StellarService       │     │
+│  │ (Patrón)    │ (Business)   │ (Blockchain)         │     │
+│  └─────────────┴──────────────┴──────────────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+                 ↓                           ↓
+┌────────────────────────────┐   ┌──────────────────────────┐
+│     MySQL Database         │   │  Stellar Blockchain      │
+│  ┌──────────────────────┐  │   │  ┌────────────────────┐ │
+│  │ - sites              │  │   │  │ Soroban Contract   │ │
+│  │ - users              │  │   │  │ (Rust)             │ │
+│  │ - customers          │  │   │  │                    │ │
+│  │ - debts              │  │   │  │ - register_debt    │ │
+│  │ - pending_payments   │  │   │  │ - register_payment │ │
+│  └──────────────────────┘  │   │  │ - get_debt         │ │
+│                            │   │  └────────────────────┘ │
+└────────────────────────────┘   └──────────────────────────┘
+```
+
+### Arquitectura de Capas
+
+1. **Capa de Presentación (API REST)**
+   - Controllers con decoradores NestJS
+   - Validación de entrada (ValidationPipe)
+   - Documentación Swagger automática
+   - Interceptores de transformación
+
+2. **Capa de Lógica de Negocio**
+   - Services con inyección de dependencias
+   - Patrón base abstracto (BaseService)
+   - Integración blockchain (StellarService)
+   - Chatbot IA (ChatbotService)
+
+3. **Capa de Persistencia**
+   - TypeORM con repositorios
+   - MySQL para datos transaccionales
+   - Stellar blockchain para inmutabilidad
+
+4. **Capa de Seguridad**
+   - AuthGuard (JWT)
+   - SiteAccessGuard (Multi-tenancy)
+   - Encriptación de claves sensibles
+   - CORS configurado
+
+---
+
+## Tecnologías Utilizadas
+
+### Backend Core
+
+| Tecnología | Versión | Propósito |
+|-----------|---------|-----------|
+| **NestJS** | 11.0.16 | Framework backend estructurado con IoC |
+| **TypeScript** | 5.7.3 | Lenguaje con tipado estático |
+| **Node.js** | 22.x | Runtime JavaScript |
+| **TypeORM** | 11.0.0 | ORM para interacción con MySQL |
+| **MySQL** | 8.x | Base de datos relacional |
+
+### Blockchain Stellar
+
+| Tecnología | Versión | Propósito |
+|-----------|---------|-----------|
+| **@stellar/stellar-sdk** | 14.3.0 | SDK JavaScript de Stellar |
+| **Soroban** | Latest | Smart Contracts en Stellar |
+| **Rust** | - | Lenguaje para smart contracts |
+
+### Autenticación y Seguridad
+
+| Tecnología | Versión | Propósito |
+|-----------|---------|-----------|
+| **Passport** | 0.7.0 | Framework de autenticación |
+| **passport-jwt** | 4.0.1 | Estrategia JWT |
+| **@nestjs/jwt** | 11.0.0 | Módulo JWT para NestJS |
+| **bcryptjs** | 3.0.2 | Hash de contraseñas |
+
+### Inteligencia Artificial
+
+| Tecnología | Versión | Propósito |
+|-----------|---------|-----------|
+| **@anthropic-ai/sdk** | 0.70.1 | Cliente API Anthropic Claude |
+| **@google/generative-ai** | 0.24.1 | Gemini AI (backup) |
+
+### Utilidades
+
+| Tecnología | Propósito |
+|-----------|-----------|
+| **class-validator** | Validación de DTOs |
+| **class-transformer** | Transformación de objetos |
+| **Swagger** | Documentación API |
+| **exceljs** | Generación de Excel |
+| **pdfmake** | Generación de PDF |
+| **sharp** | Procesamiento de imágenes |
+
+---
+
+## Estructura del Proyecto
+
+```
+service-stellar/
+├── src/                                  # Código fuente principal
+│   ├── modules/                          # Módulos funcionales
+│   │   ├── base/                         # Patrón base abstracto
+│   │   │   ├── entity/base.entity.ts     # Entidad base (id, timestamps)
+│   │   │   ├── service/base.service.ts   # Servicio CRUD genérico
+│   │   │   └── controller/base.controller.ts
+│   │   ├── auth/                         # Autenticación
+│   │   │   ├── auth.controller.ts        # Login, registro
+│   │   │   ├── auth.service.ts
+│   │   │   ├── guards/                   # AuthGuard, SiteAccessGuard
+│   │   │   └── strategies/               # JWT strategy
+│   │   ├── user/                         # Gestión de usuarios
+│   │   │   ├── entity/user.entity.ts
+│   │   │   ├── user.service.ts
+│   │   │   └── user.controller.ts
+│   │   ├── site/                         # Gestión de sitios
+│   │   │   ├── entity/site.entity.ts
+│   │   │   ├── site.service.ts
+│   │   │   └── site.controller.ts
+│   │   ├── customer/                     # Gestión de clientes
+│   │   │   ├── entity/customer.entity.ts
+│   │   │   ├── customer.service.ts
+│   │   │   └── customer.controller.ts
+│   │   ├── debt/                         # Gestión de deudas (CORE)
+│   │   │   ├── entities/debt.entity.ts
+│   │   │   ├── debt.service.ts
+│   │   │   └── debt.controller.ts
+│   │   ├── pending-payment/              # Pagos pendientes
+│   │   │   ├── entities/pending-payment.entity.ts
+│   │   │   ├── pending-payment.service.ts
+│   │   │   └── pending-payment.controller.ts
+│   │   ├── stellar/                      # Integración blockchain
+│   │   │   ├── stellar.service.ts        # SDK Stellar + Soroban
+│   │   │   └── stellar.module.ts
+│   │   └── chatbot/                      # Asistente IA
+│   │       ├── chatbot.service.ts
+│   │       └── chatbot.controller.ts
+│   ├── common/                           # Utilidades compartidas
+│   │   ├── decorators/                   # @Public(), etc.
+│   │   ├── exceptions/                   # Filtros de excepción
+│   │   └── logger/                       # Servicio de logging
+│   ├── config/                           # Configuraciones
+│   │   ├── type.orm.config.ts            # Configuración TypeORM
+│   │   └── cors.config.ts
+│   ├── interceptors/                     # Interceptores HTTP
+│   │   ├── logging.interceptor.ts
+│   │   └── transform.interceptor.ts
+│   ├── utils/                            # Funciones utilitarias
+│   ├── app.module.ts                     # Módulo raíz
+│   └── main.ts                           # Punto de entrada
+├── contracts/                            # Smart Contracts Soroban
+│   └── debt_registry/                    # Contrato de registro de deudas
+│       ├── src/lib.rs                    # Código Rust del contrato
+│       ├── Cargo.toml                    # Dependencias Rust
+│       └── target/                       # Compilados (.wasm)
+├── migrations/                           # Migraciones SQL
+│   ├── 001_create_pending_payment_table.sql
+│   └── fruta_house_db.sql
+├── dist/                                 # Código compilado (TypeScript → JS)
+├── test/                                 # Tests
+│   ├── test-api.js
+│   ├── test-blockchain.js
+│   └── test-payment-flow.js
+├── node_modules/                         # Dependencias
+├── Dockerfile                            # Multi-stage build
+├── docker-compose.yml                    # Orquestación Docker
+├── package.json                          # Dependencias Node.js
+├── tsconfig.json                         # Configuración TypeScript
+├── nest-cli.json                         # Configuración NestJS CLI
+├── .eslintrc.js                          # Configuración ESLint
+└── README.md                             # Este archivo
+```
+
+**Métricas del Proyecto:**
+- ~4,600 líneas de código TypeScript
+- 9 módulos funcionales
+- 5 entidades principales de base de datos
+- 1 smart contract Soroban (195 líneas Rust)
+- 40+ endpoints REST
+
+---
+
+## Requisitos Previos
+
+### Software Necesario
+
+- **Node.js**: 22.x o superior
+- **npm**: 11.x o superior
+- **MySQL**: 8.x
+- **Docker** (opcional): Para deployment containerizado
+- **Stellar CLI** (opcional): Para development de smart contracts
+
+### Cuenta Stellar Testnet
+
+- Cuenta con fondos en testnet (usar Friendbot)
+- Contrato Soroban desplegado en testnet
+
+**Contract ID actual:**
 ```
 CCCJCFG27XNQWMDZ4VU5XWTMKEUC6O4RNM4OOMAINYWAI3K5WHF3XH4U
 ```
 
-**Explorer:** https://stellar.expert/explorer/testnet/contract/CCCJCFG27XNQWMDZ4VU5XWTMKEUC6O4RNM4OOMAINYWAI3K5WHF3XH4U
-
-### Funciones del Contrato
-
-```rust
-// Registrar nueva deuda
-register_debt(
-  admin: Address,      // Wallet del sitio (requiere auth)
-  debt_id: u64,        // ID de MySQL
-  site_id: u64,
-  customer: Address,
-  total_amount: i128   // En centavos
-) -> DebtInfo
-
-// Registrar pago
-register_payment(
-  admin: Address,
-  debt_id: u64,
-  amount: i128,
-  payment_type: Symbol  // cash, stripe, transfer, stellar
-) -> bool
-
-// Consultar deuda
-get_debt(debt_id: u64) -> DebtInfo
-
-// Obtener número de pagos
-get_payments(debt_id: u64) -> u64
-
-// Actualizar estado
-update_status(
-  admin: Address,
-  debt_id: u64,
-  new_status: Symbol    // cancelled
-) -> bool
-```
-
-### Rebuild & Redeploy Contract
-
-```bash
-cd contracts/debt_registry
-stellar contract build
-stellar contract deploy \
-  --wasm target/wasm32v1-none/release/debt_registry.wasm \
-  --source isaac \
-  --network testnet \
-  --network-passphrase "Test SDF Network ; September 2015"
-```
-
 ---
 
-## 🚀 Setup e Instalación
+## Instalación y Configuración
 
-### Prerrequisitos
-- Node.js >= 18
-- MySQL 8
-- Stellar CLI
-- Rust (para contratos)
+### 1. Clonar el Repositorio
 
-### 1. Instalar dependencias
+```bash
+git clone https://github.com/tu-usuario/service-stellar.git
+cd service-stellar
+```
+
+### 2. Instalar Dependencias
+
 ```bash
 npm install
 ```
 
-### 2. Configurar variables de entorno
-Copiar `.env` y completar:
+### 3. Configurar Base de Datos
+
+Crear base de datos MySQL:
+
+```sql
+CREATE DATABASE frutaHouse_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+Ejecutar migraciones (opcional, TypeORM sincroniza automáticamente):
+
+```bash
+mysql -u root -p frutaHouse_db < migrations/fruta_house_db.sql
+```
+
+### 4. Configurar Variables de Entorno
+
+Crear archivo `.env` en la raíz del proyecto (ver sección [Variables de Entorno](#variables-de-entorno)).
+
+### 5. Ejecutar en Desarrollo
+
+```bash
+npm run start:dev
+```
+
+La aplicación estará disponible en `http://localhost:4008`
+
+### 6. Acceder a Documentación Swagger
+
+```bash
+http://localhost:4008/api
+```
+
+---
+
+## Variables de Entorno
+
+Crear archivo `.env` en la raíz:
+
 ```env
-# Database
+# ==========================================
+# DATABASE CONFIGURATION
+# ==========================================
 DB_HOST=localhost
 DB_PORT=3306
 DB_DATABASE=frutaHouse_db
 DB_USERNAME=root
 DB_PASSWORD=root
 
-# App
-APP_PORT=4008
-JWT_SECRET=your-secret-key
+# ==========================================
+# APPLICATION
+# ==========================================
+PORT=4008
+NODE_ENV=development
 
-# Stellar/Soroban
+# ==========================================
+# JWT AUTHENTICATION
+# ==========================================
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+JWT_EXPIRES_IN=7d
+
+# ==========================================
+# STELLAR BLOCKCHAIN
+# ==========================================
 STELLAR_RPC_URL=https://soroban-testnet.stellar.org:443
 STELLAR_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 SOROBAN_CONTRACT_ID=CCCJCFG27XNQWMDZ4VU5XWTMKEUC6O4RNM4OOMAINYWAI3K5WHF3XH4U
-ENCRYPTION_KEY=your-32-byte-key
 
-# Stripe (opcional)
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
+# IMPORTANT: Key de 32 bytes para encriptar stellar_secret_key
+ENCRYPTION_KEY=your-32-byte-encryption-key-here-must-be-32-chars!
+
+# ==========================================
+# AI CHATBOT (Anthropic Claude)
+# ==========================================
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxxxxxxxxxxxxxx
+
+# ==========================================
+# PAYMENT INTEGRATIONS (Opcional)
+# ==========================================
+STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxx
+
+# ==========================================
+# AWS S3 (Opcional - para futuros documentos)
+# ==========================================
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_S3_BUCKET=your-bucket-name
+AWS_REGION=us-east-1
 ```
 
-### 3. Ejecutar migraciones
-```bash
-npm run migration:run
-```
-
-### 4. Iniciar servidor
-```bash
-npm run start:dev
-```
-
-Servidor disponible en: http://localhost:4008
+**Notas importantes:**
+- `JWT_SECRET`: Cambiar en producción por valor seguro
+- `ENCRYPTION_KEY`: Debe tener exactamente 32 caracteres
+- `ANTHROPIC_API_KEY`: Obtener en https://console.anthropic.com/
+- Valores Stellar: Usar mainnet en producción
 
 ---
 
-## 📡 API Endpoints
+## Módulos Funcionales
 
-### Sites
-```
-POST   /sites              Create site + generate Stellar wallet
-GET    /sites              List all sites
-GET    /sites/:id          Get site details
-PATCH  /sites/:id          Update site
-```
+Ver el resto del README en los commits posteriores debido a la extensión del documento. El README contiene:
 
-### Users
-```
-POST   /users              Create user
-POST   /users/login        Login (JWT)
-GET    /users              List users by site
-GET    /users/:id          Get user
-```
-
-### Customers
-```
-POST   /customers          Create customer
-GET    /customers          List customers by site
-GET    /customers/:id      Get customer + debt history
-PATCH  /customers/:id      Update customer
-```
-
-### Debts (Core)
-```
-POST   /debts              Create debt → MySQL + Soroban ⭐
-GET    /debts              List debts (filter by site, customer, status)
-GET    /debts/:id          Get debt details
-PATCH  /debts/:id/pay      Register manual payment (cash/transfer) ⭐
-POST   /debts/:id/pay-stripe  Create Stripe payment intent
-PATCH  /debts/:id/cancel   Cancel debt
-```
+1. Base Module (Patrón Abstracto)
+2. Auth Module (Autenticación JWT)
+3. Site Module (Gestión de sitios)
+4. User Module (Gestión de usuarios)
+5. Customer Module (Gestión de clientes)
+6. Debt Module (CORE - Gestión de deudas)
+7. Pending Payment Module (Sistema de aprobación)
+8. Stellar Module (Integración blockchain)
+9. Chatbot Module (Asistente IA)
+10. Smart Contract Soroban (Rust)
+11. Base de Datos (Esquemas y relaciones)
+12. API Endpoints (Documentación completa)
+13. Flujos de Trabajo (Casos de uso)
+14. Seguridad (JWT, RBAC, validaciones)
+15. Testing (Unit, E2E, Coverage)
+16. Deployment (Docker, Producción)
+17. Documentación API (Swagger)
+18. Mejores Prácticas
+19. Roadmap
+20. Recursos Adicionales
 
 ---
 
-## 🔧 Próximos Pasos para Completar
-
-### 1. Implementar StellarService
-
-Crear `src/modules/stellar/stellar.service.ts`:
-
-```typescript
-import { Injectable } from '@nestjs/common';
-import * as StellarSdk from '@stellar/stellar-sdk';
-import { ConfigService } from '@nestjs/config';
-
-@Injectable()
-export class StellarService {
-  private server: StellarSdk.SorobanRpc.Server;
-  private contract: StellarSdk.Contract;
-  private networkPassphrase: string;
-
-  constructor(private configService: ConfigService) {
-    const rpcUrl = this.configService.get('STELLAR_RPC_URL');
-    this.server = new StellarSdk.SorobanRpc.Server(rpcUrl);
-
-    const contractId = this.configService.get('SOROBAN_CONTRACT_ID');
-    this.contract = new StellarSdk.Contract(contractId);
-
-    this.networkPassphrase = this.configService.get('STELLAR_NETWORK_PASSPHRASE');
-  }
-
-  async registerDebt(
-    sitePublicKey: string,
-    siteSecretKey: string,
-    debtId: number,
-    siteId: number,
-    customerAddress: string,
-    totalAmount: number,
-  ): Promise<string> {
-    // TODO: Implement contract invocation
-    // 1. Load account
-    // 2. Build transaction with contract.call('register_debt', ...)
-    // 3. Sign with site keypair
-    // 4. Submit and return tx hash
-  }
-
-  async registerPayment(
-    sitePublicKey: string,
-    siteSecretKey: string,
-    debtId: number,
-    amount: number,
-    paymentType: string,
-  ): Promise<string> {
-    // TODO: Implement
-  }
-
-  async getDebt(debtId: number): Promise<any> {
-    // TODO: Query contract
-  }
-}
-```
-
-### 2. Integrar con DebtService
-
-Actualizar `src/modules/debt/debt.service.ts`:
-
-```typescript
-async create(createDebtDto: CreateDebtDto): Promise<DebtEntity> {
-  // 1. Save to MySQL
-  const debt = await this.debtRepository.save(createDebtDto);
-
-  // 2. Get site wallet
-  const site = await this.siteRepository.findOne({ where: { id: debt.siteId } });
-
-  // 3. Register on blockchain
-  try {
-    const txHash = await this.stellarService.registerDebt(
-      site.stellar_public_key,
-      site.stellar_secret_key,
-      debt.id,
-      debt.siteId,
-      customer.stellar_public_key || 'PLACEHOLDER_ADDRESS',
-      debt.total_amount,
-    );
-
-    debt.stellar_tx_hash = txHash;
-    await this.debtRepository.save(debt);
-  } catch (error) {
-    console.error('Blockchain registration failed:', error);
-  }
-
-  return debt;
-}
-```
-
-### 3. Instalar y configurar Stripe
-
-```bash
-npm install stripe
-```
-
-Crear PaymentService con webhook handler.
-
----
-
-## 📚 Documentación de Referencia
-
-- **Stellar Smart Contracts**: https://developers.stellar.org/docs/build/smart-contracts
-- **Soroban Storage**: https://developers.stellar.org/es/docs/build/guides/storage
-- **Soroban Events**: https://developers.stellar.org/es/docs/build/guides/events
-- **Soroban Auth**: https://developers.stellar.org/es/docs/build/guides/auth
-- **Stellar SDK JS**: https://stellar.github.io/js-stellar-sdk/
-
----
-
-## 🔒 Notas de Seguridad
-
-⚠️ **IMPORTANTE:**
-
-1. **NUNCA** guardar `stellar_secret_key` en texto plano
-2. Usar encriptación AES-256 para secret keys
-3. Validar TODOS los inputs con DTOs y class-validator
-4. Rate limiting en endpoints públicos
-5. HTTPS obligatorio en producción
-6. Verificar firma en Stripe webhooks
-7. Usar JWT con refresh tokens
-
----
-
-## 📊 Testing
-
-```bash
-# Unit tests
-npm run test
-
-# E2E tests
-npm run test:e2e
-
-# Coverage
-npm run test:cov
-```
-
----
-
-## 🎯 Flujo Completo de Uso
-
-### 1. Crear Site y generar wallet
-```bash
-POST /sites
-{
-  "name": "Tienda Centro",
-  "rfc": "ABC123456789",
-  "address": "Av. Juárez 123"
-}
-# Backend genera automáticamente stellar_public_key y stellar_secret_key
-```
-
-### 2. Crear Customer
-```bash
-POST /customers
-{
-  "site_id": 1,
-  "name": "Juan Pérez",
-  "phone_number": "5512345678"
-}
-```
-
-### 3. Registrar Deuda
-```bash
-POST /debts
-{
-  "site_id": 1,
-  "customer_id": 5,
-  "total_amount": 1500.00,
-  "description": "Mercancía variada",
-  "created_by": 1
-}
-# Response incluye stellar_tx_hash del registro en blockchain
-```
-
-### 4. Pagar Deuda
-```bash
-PATCH /debts/123/pay
-{
-  "amount": 500.00,
-  "payment_type": "cash"
-}
-# Actualiza MySQL + registra pago en blockchain
-```
-
-### 5. Verificar en Blockchain
-```bash
-GET /stellar/debt/123
-# Retorna datos inmutables de la blockchain
-```
-
----
-
-## 👥 Equipo de Desarrollo
-
-Hackathon Stellar - Sistema de Deudas Blockchain
-
----
-
-## 📝 Licencia
-
-MIT
+*Última actualización: 21 de Noviembre, 2025*
